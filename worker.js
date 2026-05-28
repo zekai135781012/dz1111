@@ -25,7 +25,7 @@ const WEATHER_URL_MAP = {
   // 幽灵
   "https://widget.fp.ps.netease.com/file/693651729065b221195b6e5djvOpM24N07.png": "幽灵",
   // 炽热
-  "https://noah-vision-public.s3v2.nie.netease.com/online/vision_4605923572_H97y.png": "炽热",
+  "https://widget.fp.ps.netease.com/file/693663ba1a574dca50a39999UD6TXKJ507.png": "炽热",
   // 细雨
   "https://noah-vision-public.s3v2.nie.netease.com/online/vision_4605923573_I9S4.png": "细雨",
   // 雷雨
