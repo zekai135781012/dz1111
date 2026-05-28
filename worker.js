@@ -1,89 +1,55 @@
-// ======================== 天气识别模块（新增） ========================
-const WEATHER_NAMES = {
-  "deluge": "暴雨", "drizzle": "细雨", "redhot": "炽热",
-  "lowtemperature": "低温", "fair_wind": "惠风", "snow": "雪",
-  "gale": "大风", "thunderstorm": "雷雨", "typhoon": "台风",
-  "darkfog": "暗雾", "eclipse": "日蚀", "firefly": "萤火",
-  "fog": "雾", "meteorshower": "流星雨", "neon": "霓虹",
-  "sandstorm": "沙尘暴", "solarflare": "太阳耀斑", "meteorite": "陨石",
-  "fault": "故障", "rainball": "彩虹", "aurora": "极光", "ghost": "幽灵"
+// ======================== 天气 URL → 名称映射表 ========================
+const WEATHER_URL_MAP = {
+  // 大风
+  "https://widget.fp.ps.netease.com/file/693663baa2f97dd3de09e29ftroicpWu07.png": "大风",
+  // 故障
+  "https://widget.fp.ps.netease.com/file/69f13fd3c80fbeb22ba1c346QUlTmMBB07.png": "故障",
+  // 萤火
+  "https://widget.fp.ps.netease.com/file/693651729bb3342ac54938392OVHuyFR07.png": "萤火",
+  // 霓虹
+  "https://widget.fp.ps.netease.com/file/693651714e8f3ba036914fe0d6wCyZS707.png": "霓虹",
+  // 彩虹 (rainball)
+  "https://widget.fp.ps.netease.com/file/693663bbd44e87eaddf05cf7FFJcO1Jp07.png": "彩虹",
+  // 日蚀
+  "https://widget.fp.ps.netease.com/file/697a97ae4ffff555d8de9a31uIzhrELS07.png": "日蚀",
+  // 雾
+  "https://widget.fp.ps.netease.com/file/69365171abb97074fc049b41QSTSUB3z07.png": "雾",
+  // 太阳耀斑
+  "https://widget.fp.ps.netease.com/file/697a97ad7f7bf07307da3b49B8hxtCGj07.png": "太阳耀斑",
+  // 流星雨
+  "https://widget.fp.ps.netease.com/file/693651719065b221195b6e57i5AHk7MI07.png": "流星雨",
+  // 暗雾
+  "https://widget.fp.ps.netease.com/file/697a97ae5c1044717fc90ef8zgYABEyJ07.png": "暗雾",
+  // 极光
+  "https://widget.fp.ps.netease.com/file/693663ba6019e34d6ff07ceeBHJvqs0y07.png": "极光",
+  // 幽灵
+  "https://widget.fp.ps.netease.com/file/693651729065b221195b6e5djvOpM24N07.png": "幽灵",
+  // 炽热
+  "https://noah-vision-public.s3v2.nie.netease.com/online/vision_4605923572_H97y.png": "炽热",
+  // 细雨
+  "https://noah-vision-public.s3v2.nie.netease.com/online/vision_4605923573_I9S4.png": "细雨",
+  // 雷雨
+  "https://widget.fp.ps.netease.com/file/69365170edad12ae22de280d4ie4rmos07.png": "雷雨",
+  // 雪
+  "https://widget.fp.ps.netease.com/file/693663bbfbe38f0ab8cf5c03jO55t93s07.png": "雪",
+  // 惠风
+  "https://widget.fp.ps.netease.com/file/693663bbb193d34b06d6b8f4HrPOiB6207.png": "惠风",
+  // 暴雨
+  "https://widget.fp.ps.netease.com/file/693663bab01d4aa011a7900dsvy4MY3B07.png": "暴雨",
+  // 低温
+  "https://widget.fp.ps.netease.com/file/693663baf81fe8f8016483bau5ZJtDe307.png": "低温",
+  // 台风
+  "https://widget.fp.ps.netease.com/file/693651709cfdc95b39c563952ppdT3L307.png": "台风",
+  // 陨石
+  "https://widget.fp.ps.netease.com/file/697a97ae440c90bc65b9d6aeXhwaWrGh07.png": "陨石"
 };
 
-const TEMPLATE_FEATURES = {
-  "aurora": [703,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,44,0,0,0,52,0,0,0,0,0,0,0,0,0,0,0,60,0,0,0,165],
-  "darkfog": [637,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,150,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,210],
-  "deluge": [653,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,147,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,50,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,149],
-  "drizzle": [618,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,154,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,51,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,199],
-  "eclipse": [801,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,4,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,16,0,0,0,4,21,141],
-  "fair_wind": [735,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,179],
-  "fault": [551,0,0,0,0,0,0,0,0,0,0,3,0,0,0,71,0,0,0,0,0,0,0,0,0,0,0,17,0,0,0,8,0,0,0,0,0,0,13,4,0,0,0,0,0,0,0,40,0,0,164,0,0,0,4,1,0,0,0,0,0,0,0,148],
-  "firefly": [685,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,132,4,0,46,9,13,128],
-  "fog": [716,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,97,25,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,182],
-  "gale": [724,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,80,0,0,0,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,156],
-  "ghost": [559,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,107,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,51,0,0,0,301],
-  "lowtemperature": [741,0,0,0,0,0,0,39,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,78,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,142],
-  "meteorite": [711,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,18,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,26,14,11,154],
-  "meteorshower": [703,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,26,37,23,235],
-  "neon": [701,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,32,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,6,0,11,4,2,0,0,0,0,0,0,0,0,0,1,16,1,2,88,5,141],
-  "rainball": [569,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,101,39,70,245],
-  "redhot": [715,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,78,0,0,0,0,0,0,0,0,0,0,56,0,0,0,0,9,0,0,0,0,166],
-  "sandstorm": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,495,0,0,0,29,7,0,0,0,0,0,0,0,0,0,0,0,0,0,10,157,7,0,0,20,72,227],
-  "snow": [655,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,118,0,0,0,34,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,174],
-  "solarflare": [662,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,49,0,0,0,133,9,0,0,0,7,18,146],
-  "thunderstorm": [651,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,117,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,0,0,0,0,0,0,0,0,0,0,0,0,42,9,8,178],
-  "typhoon": [708,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,145,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,171]
-};
-
-const SIZE = 32;
-const DIFF_THRESHOLD = 0.15;
-
-function computeHistogram(imageData) {
-  const hist = new Array(64).fill(0);
-  for (let i = 0; i < imageData.length; i += 4) {
-    const r = imageData[i] >> 6;
-    const g = imageData[i+1] >> 6;
-    const b = imageData[i+2] >> 6;
-    const idx = r * 16 + g * 4 + b;
-    hist[idx]++;
-  }
-  return hist;
+// 辅助函数：根据 URL 获取天气名称
+function getWeatherName(url) {
+  return WEATHER_URL_MAP[url] || "未知";
 }
 
-function histogramDistance(histA, histB) {
-  let intersection = 0;
-  for (let i = 0; i < 64; i++) intersection += Math.min(histA[i], histB[i]);
-  return 1 - intersection / (SIZE * SIZE);
-}
-
-async function recognizeWeather(url) {
-  try {
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const blob = await resp.blob();
-    const bitmap = await createImageBitmap(blob);
-    const canvas = new OffscreenCanvas(SIZE, SIZE);
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(bitmap, 0, 0, SIZE, SIZE);
-    const imageData = ctx.getImageData(0, 0, SIZE, SIZE).data;
-    const hist = computeHistogram(imageData);
-
-    let bestKey = null;
-    let bestDist = Infinity;
-    for (const [key, tmpl] of Object.entries(TEMPLATE_FEATURES)) {
-      const dist = histogramDistance(hist, tmpl);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestKey = key;
-      }
-    }
-    return bestDist <= DIFF_THRESHOLD ? (WEATHER_NAMES[bestKey] || "未知") : "未知";
-  } catch(e) {
-    console.error(`识别失败: ${url}`, e);
-    return "获取失败";
-  }
-}
-// ======================== 天气识别模块结束 ========================
-
+// ======================== 原有核心逻辑（签名 + 请求网易）=======================
 export default {
   async fetch(request, env, ctx) {
     var cors = {
@@ -125,24 +91,21 @@ export default {
       });
       var json = await resp.json();
       if (json.success !== 'true') {
-        // 输出详细错误到日志
-        console.error("网易接口错误详情:", JSON.stringify(json));
-        return jr({ success: false, error: json.desc || json.message || 'ERROR3' }, 500);
+        return jr({ success: false, error: json.desc || '失败' }, 500);
       }
       var el = json.data && json.data.view && json.data.view.elements ? json.data.view.elements : {};
-      var wi = [];
-      if (el['image_R3Xw:R5xp'] && el['image_R3Xw:R5xp'].src) wi.push(el['image_R3Xw:R5xp'].src);
-      if (el['image_JeHp:Vmcb'] && el['image_JeHp:Vmcb'].src) wi.push(el['image_JeHp:Vmcb'].src);
+      var weatherIcons = [];
+      if (el['image_R3Xw:R5xp'] && el['image_R3Xw:R5xp'].src) weatherIcons.push(el['image_R3Xw:R5xp'].src);
+      if (el['image_JeHp:Vmcb'] && el['image_JeHp:Vmcb'].src) weatherIcons.push(el['image_JeHp:Vmcb'].src);
       
-      // ========== 新增：识别天气 ==========
-      var weatherNames = await Promise.all(wi.map(url => recognizeWeather(url)));
-      // ==================================
+      // 根据 URL 映射获取天气名称
+      var weatherNames = weatherIcons.map(url => getWeatherName(url));
       
       return jr({
         success: true,
         data: {
-          weatherIcons: wi,
-          weatherNames: weatherNames,   // 新增字段
+          weatherIcons: weatherIcons,
+          weatherNames: weatherNames,
           seedImage: gs(el, 'image_Lb2J:5Fo7'),
           seedName: gt(el, 'text_TLl5:dwdi'),
           seedQualityBg: gs(el, 'image_z9Sa:fdFU'),
