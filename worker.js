@@ -30,6 +30,8 @@ const WEATHER_URL_MAP = {
   "https://noah-vision-public.s3v2.nie.netease.com/online/vision_4605923572_H97y.png": "炽热",
   // 细雨
   "https://noah-vision-public.s3v2.nie.netease.com/online/vision_4605923573_I9S4.png": "细雨",
+    // 细雨
+  "https://widget.fp.ps.netease.com/file/693651714040e9700d2be08b5XI0sHdx07.png": "细雨",
   // 雷雨
   "https://widget.fp.ps.netease.com/file/69365170edad12ae22de280d4ie4rmos07.png": "雷雨",
   // 雪
