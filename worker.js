@@ -44,6 +44,8 @@ const WEATHER_URL_MAP = {
   "https://widget.fp.ps.netease.com/file/693663baf81fe8f8016483bau5ZJtDe307.png": "低温",
   // 台风
   "https://widget.fp.ps.netease.com/file/693651709cfdc95b39c563952ppdT3L307.png": "台风",
+    // 沙尘暴
+  "https://widget.fp.ps.netease.com/file/693663ba45606d348a946200Q7rYsVj107.png": "沙尘暴",
   // 陨石
   "https://widget.fp.ps.netease.com/file/697a97ae440c90bc65b9d6aeXhwaWrGh07.png": "陨石"
 };
