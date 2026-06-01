@@ -45,15 +45,14 @@ export default {
       return jr({ success: false, error: 'Not Found' }, 404);
     }
     try {
-      var roleId = env.FARM_ROLE_ID;
+      var roleId = env.FARM_ROLE_ID || '667612565';
       var server = env.FARM_SERVER || '15001';
-      var deviceModel = env.FARM_DEVICE_MODEL;
-      var uuid = env.FARM_UUID;
+      var deviceModel = env.FARM_DEVICE_MODEL || 'Xiaomi#2311DRK48C';
+      var uuid = env.FARM_UUID || 'ef04cb4babb31ab4';
       var token = env.FARM_TOKEN || 'aU0ZcOzmpNoa56fDez';
-      if (!roleId || !deviceModel || !uuid) {
-        return jr({ success: false, error: '配置不完整，请检查环境变量' }, 500);
-      }
+      
       var auth = ga(roleId, token);
+      
       var body = JSON.stringify({
         server: server,
         code: 'u5',
@@ -64,13 +63,13 @@ export default {
         uuid: uuid,
         mode: 'view',
         systemName: 'android',
-        batteryState: 3,
+        batteryState: 2,
         extra: '',
         appId: '4608997350',
-        batteryLevel: 90,
+        batteryLevel: 61,
         gameId: 'u5',
         roleId: roleId,
-        deeplink: '[]',
+        deeplink: '[{"scheme":"ntes","host":"game.mobile","pathPrefix":"/party"},{"scheme":"ntes","host":"game.mobile","pathPrefix":"/u5."},{"scheme":"ntesu5","host":"game.mobile"},{"scheme":"ntesu5","host":"com.netease.party.bilibili"}]',
         env: 'production',
         nonce: auth.nonce,
         size: 'medium',
@@ -81,15 +80,24 @@ export default {
         ts: auth.ts,
         nightMode: false
       });
+      
       var resp = await fetch('https://u5-vision.nie.netease.com/widget/view', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 16; 2311DRK48C Build/BP2A.250605.031.A3)',
+          'Host': 'u5-vision.nie.netease.com',
+          'Connection': 'Keep-Alive',
+          'Accept-Encoding': 'gzip'
+        },
         body: body
       });
+      
       var json = await resp.json();
       if (json.success !== 'true') {
         return jr({ success: false, error: json.desc || '失败' }, 500);
       }
+      
       var el = json.data && json.data.view && json.data.view.elements ? json.data.view.elements : {};
       var weatherIcons = [];
       if (el['image_R3Xw:R5xp'] && el['image_R3Xw:R5xp'].src) weatherIcons.push(el['image_R3Xw:R5xp'].src);
