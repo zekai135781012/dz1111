@@ -30,10 +30,9 @@ function getWeatherName(url) {
   return WEATHER_URL_MAP[url] || "未知";
 }
 
-// ======================== 主逻辑 ========================
 export default {
   async fetch(request, env, ctx) {
-    const cors = {
+    var cors = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
@@ -41,26 +40,22 @@ export default {
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: cors });
     }
-    const url = new URL(request.url);
+    var url = new URL(request.url);
     if (url.pathname !== '/api/farm/latest') {
       return jr({ success: false, error: 'Not Found' }, 404);
     }
     try {
-      const roleId = env.FARM_ROLE_ID;
-      const deviceModel = env.FARM_DEVICE_MODEL;
-      const uuid = env.FARM_UUID;
-      const token = env.FARM_TOKEN || 'aU0ZcOzmpNoa56fDez';
+      var roleId = env.FARM_ROLE_ID;
+      var server = env.FARM_SERVER || '15001';
+      var deviceModel = env.FARM_DEVICE_MODEL;
+      var uuid = env.FARM_UUID;
+      var token = env.FARM_TOKEN || 'aU0ZcOzmpNoa56fDez';
       if (!roleId || !deviceModel || !uuid) {
-        return jr({ success: false, error: '配置不完整' }, 500);
+        return jr({ success: false, error: '配置不完整，请检查环境变量' }, 500);
       }
-
-      const auth = ga(roleId, token); // 生成 sign, nonce, ts
-
-      // 与示例完全一致的 deeplink 字符串
-      const deeplinkStr = '[{"scheme":"ntes","host":"game.mobile","pathPrefix":"/party"},{"scheme":"ntes","host":"game.mobile","pathPrefix":"/u5."},{"scheme":"ntesu5","host":"game.mobile"},{"scheme":"ntesu5","host":"com.netease.party.bilibili"}]';
-
-      const body = JSON.stringify({
-        server: '15001',
+      var auth = ga(roleId, token);
+      var body = JSON.stringify({
+        server: server,
         code: 'u5',
         sign: auth.sign,
         language: 'zh-CN',
@@ -69,13 +64,13 @@ export default {
         uuid: uuid,
         mode: 'view',
         systemName: 'android',
-        batteryState: 2,       // 修改为 2
+        batteryState: 3,
         extra: '',
         appId: '4608997350',
-        batteryLevel: 61,      // 修改为 61
+        batteryLevel: 90,
         gameId: 'u5',
         roleId: roleId,
-        deeplink: deeplinkStr, // 修改为完整规则
+        deeplink: '[]',
         env: 'production',
         nonce: auth.nonce,
         size: 'medium',
@@ -86,23 +81,21 @@ export default {
         ts: auth.ts,
         nightMode: false
       });
-
-      const resp = await fetch('https://u5-vision.nie.netease.com/widget/view', {
+      var resp = await fetch('https://u5-vision.nie.netease.com/widget/view', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: body
       });
-
-      const json = await resp.json();
+      var json = await resp.json();
       if (json.success !== 'true') {
         return jr({ success: false, error: json.desc || '失败' }, 500);
       }
-
-      const el = json.data && json.data.view && json.data.view.elements ? json.data.view.elements : {};
-      const weatherIcons = [];
+      var el = json.data && json.data.view && json.data.view.elements ? json.data.view.elements : {};
+      var weatherIcons = [];
       if (el['image_R3Xw:R5xp'] && el['image_R3Xw:R5xp'].src) weatherIcons.push(el['image_R3Xw:R5xp'].src);
       if (el['image_JeHp:Vmcb'] && el['image_JeHp:Vmcb'].src) weatherIcons.push(el['image_JeHp:Vmcb'].src);
-      const weatherNames = weatherIcons.map(url => getWeatherName(url));
+
+      var weatherNames = weatherIcons.map(url => getWeatherName(url));
 
       return jr({
         success: true,
@@ -127,7 +120,6 @@ export default {
   }
 };
 
-// 辅助函数
 function gs(o, k) { return o[k] && o[k].src ? o[k].src : ''; }
 function gt(o, k) { return o[k] && o[k].content ? o[k].content : ''; }
 function jr(d, s) {
@@ -137,20 +129,17 @@ function jr(d, s) {
   });
 }
 
-// 签名生成 (与示例算法一致)
 function ga(roleId, token) {
-  const ts = Date.now();
-  const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-  let nonce = '';
-  for (let i = 0; i < 18; i++) nonce += chars.charAt(Math.floor(Math.random() * 36));
-  const now = new Date(ts + 28800000);
-  const ds = now.getUTCFullYear() + '' + String(now.getUTCMonth() + 1).padStart(2, '0') + '' + String(now.getUTCDate()).padStart(2, '0');
-  const dt = md5('code=u5&date=' + ds + '&token=' + token);
-  const sign = md5('code=u5&roleId=' + roleId + '&nonce=' + nonce + '&ts=' + ts + '&token=' + dt);
-  return { sign, nonce, ts };
+  var ts = Date.now();
+  var chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+  var nonce = '';
+  for (var i = 0; i < 18; i++) nonce += chars.charAt(Math.floor(Math.random() * 36));
+  var now = new Date(ts + 28800000);
+  var ds = now.getUTCFullYear() + '' + String(now.getUTCMonth() + 1).padStart(2, '0') + '' + String(now.getUTCDate()).padStart(2, '0');
+  var dt = md5('code=u5&date=' + ds + '&token=' + token);
+  return { sign: md5('code=u5&roleId=' + roleId + '&nonce=' + nonce + '&ts=' + ts + '&token=' + dt), nonce: nonce, ts: ts };
 }
 
-// MD5 实现 (已完整)
 function md5(s) {
   function L(k, d) { return (k << d) | (k >>> (32 - d)); }
   function K(G, k) { var I, d, F, H, x; F = (G & 2147483648); H = (k & 2147483648); I = (G & 1073741824); d = (k & 1073741824); x = (G & 1073741823) + (k & 1073741823); if (I & d) return (x ^ 2147483648 ^ F ^ H); if (I | d) { if (x & 1073741824) return (x ^ 3221225472 ^ F ^ H); else return (x ^ 1073741824 ^ F ^ H); } else return (x ^ F ^ H); }
