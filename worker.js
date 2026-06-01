@@ -3,7 +3,13 @@ const ROLE_ID = '667612565';
 const SERVER = '15001';
 const UUID = 'ef04cb4babb31ab4';
 const DEVICE_MODEL = 'Xiaomi#2311DRK48C';
-const TOKEN = 'aU0ZcOzmpNoa56fDez';
+
+// ======================== 夜间休眠判断 ========================
+function isNightSleep() {
+  var hour = new Date().getUTCHours() + 8;
+  if (hour >= 24) hour -= 24;
+  return hour >= 0 && hour < 8;
+}
 
 // ======================== 天气 URL → 名称映射表 ========================
 const WEATHER_URL_MAP = {
@@ -38,7 +44,7 @@ function getWeatherName(url) {
 }
 
 export default {
-  async fetch(request, ctx) {
+  async fetch(request, env, ctx) {
     var cors = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -51,8 +57,18 @@ export default {
     if (url.pathname !== '/api/farm/latest') {
       return jr({ success: false, error: 'Not Found' }, 404);
     }
+
+    // 🌙 夜间休眠：00:00-08:00 不请求 API
+    if (isNightSleep()) {
+      return jr({
+        success: false,
+        error: '🌙 夜间休眠中（00:00-08:00），API 暂停响应，08:00后恢复。'
+      }, 503);
+    }
+
     try {
-      var auth = ga(ROLE_ID, TOKEN);
+      var token = env.FARM_TOKEN || 'aU0ZcOzmpNoa56fDez';
+      var auth = ga(ROLE_ID, token);
 
       var body = JSON.stringify({
         server: SERVER,
