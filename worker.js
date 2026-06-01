@@ -1,64 +1,39 @@
 // ======================== 天气 URL → 名称映射表 ========================
 const WEATHER_URL_MAP = {
-  // 大风
   "https://widget.fp.ps.netease.com/file/693663baa2f97dd3de09e29ftroicpWu07.png": "大风",
-  // 故障
   "https://widget.fp.ps.netease.com/file/69f13fd3c80fbeb22ba1c346QUlTmMBB07.png": "故障",
-  // 萤火
   "https://widget.fp.ps.netease.com/file/693651729bb3342ac54938392OVHuyFR07.png": "萤火",
-  // 霓虹
   "https://widget.fp.ps.netease.com/file/693651714e8f3ba036914fe0d6wCyZS707.png": "霓虹",
-  // 彩虹 (rainball)
   "https://widget.fp.ps.netease.com/file/693663bbd44e87eaddf05cf7FFJcO1Jp07.png": "彩虹",
-  // 日蚀
   "https://widget.fp.ps.netease.com/file/697a97ae4ffff555d8de9a31uIzhrELS07.png": "日蚀",
-  // 雾
   "https://widget.fp.ps.netease.com/file/69365171abb97074fc049b41QSTSUB3z07.png": "雾",
-  // 太阳耀斑
   "https://widget.fp.ps.netease.com/file/697a97ad7f7bf07307da3b49B8hxtCGj07.png": "太阳耀斑",
-  // 流星雨
   "https://widget.fp.ps.netease.com/file/693651719065b221195b6e57i5AHk7MI07.png": "流星雨",
-  // 暗雾
   "https://widget.fp.ps.netease.com/file/697a97ae5c1044717fc90ef8zgYABEyJ07.png": "暗雾",
-  // 极光
   "https://widget.fp.ps.netease.com/file/693663ba6019e34d6ff07ceeBHJvqs0y07.png": "极光",
-  // 幽灵
   "https://widget.fp.ps.netease.com/file/693651729065b221195b6e5djvOpM24N07.png": "幽灵",
-  // 炽热
   "https://widget.fp.ps.netease.com/file/693663ba1a574dca50a39999UD6TXKJ507.png": "炽热",
-    // 炽热
   "https://noah-vision-public.s3v2.nie.netease.com/online/vision_4605923572_H97y.png": "炽热",
-  // 细雨
   "https://noah-vision-public.s3v2.nie.netease.com/online/vision_4605923573_I9S4.png": "细雨",
-    // 细雨
   "https://widget.fp.ps.netease.com/file/693651714040e9700d2be08b5XI0sHdx07.png": "细雨",
-  // 雷雨
   "https://widget.fp.ps.netease.com/file/69365170edad12ae22de280d4ie4rmos07.png": "雷雨",
-  // 雪
   "https://widget.fp.ps.netease.com/file/693663bbfbe38f0ab8cf5c03jO55t93s07.png": "雪",
-  // 惠风
   "https://widget.fp.ps.netease.com/file/693663bbb193d34b06d6b8f4HrPOiB6207.png": "惠风",
-  // 暴雨
   "https://widget.fp.ps.netease.com/file/693663bab01d4aa011a7900dsvy4MY3B07.png": "暴雨",
-  // 低温
   "https://widget.fp.ps.netease.com/file/693663baf81fe8f8016483bau5ZJtDe307.png": "低温",
-  // 台风
   "https://widget.fp.ps.netease.com/file/693651709cfdc95b39c563952ppdT3L307.png": "台风",
-    // 沙尘暴
   "https://widget.fp.ps.netease.com/file/693663ba45606d348a946200Q7rYsVj107.png": "沙尘暴",
-  // 陨石
   "https://widget.fp.ps.netease.com/file/697a97ae440c90bc65b9d6aeXhwaWrGh07.png": "陨石"
 };
 
-// 辅助函数：根据 URL 获取天气名称
 function getWeatherName(url) {
   return WEATHER_URL_MAP[url] || "未知";
 }
 
-// ======================== 原有核心逻辑（签名 + 请求网易）=======================
+// ======================== 主逻辑 ========================
 export default {
   async fetch(request, env, ctx) {
-    var cors = {
+    const cors = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
@@ -66,47 +41,69 @@ export default {
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: cors });
     }
-    var url = new URL(request.url);
+    const url = new URL(request.url);
     if (url.pathname !== '/api/farm/latest') {
       return jr({ success: false, error: 'Not Found' }, 404);
     }
     try {
-      var roleId = env.FARM_ROLE_ID;
-      var deviceModel = env.FARM_DEVICE_MODEL;
-      var uuid = env.FARM_UUID;
-      var token = env.FARM_TOKEN || 'aU0ZcOzmpNoa56fDez';
+      const roleId = env.FARM_ROLE_ID;
+      const deviceModel = env.FARM_DEVICE_MODEL;
+      const uuid = env.FARM_UUID;
+      const token = env.FARM_TOKEN || 'aU0ZcOzmpNoa56fDez';
       if (!roleId || !deviceModel || !uuid) {
         return jr({ success: false, error: '配置不完整' }, 500);
       }
-      var auth = ga(roleId, token);
-      var body = JSON.stringify({
-        server: '15001', code: 'u5', sign: auth.sign,
-        language: 'zh-CN', deviceName: 'duchamp', systemVersion: 36,
-        uuid: uuid, mode: 'view', systemName: 'android',
-        batteryState: 3, extra: '', appId: '4608997350',
-        batteryLevel: 90, gameId: 'u5', roleId: roleId,
-        deeplink: '[]', env: 'production', nonce: auth.nonce,
-        size: 'medium', domain: 'https://u5-vision.nie.netease.com',
-        designId: 4608997351, sdkVersion: 3, deviceModel: deviceModel,
-        ts: auth.ts, nightMode: false
+
+      const auth = ga(roleId, token); // 生成 sign, nonce, ts
+
+      // 与示例完全一致的 deeplink 字符串
+      const deeplinkStr = '[{"scheme":"ntes","host":"game.mobile","pathPrefix":"/party"},{"scheme":"ntes","host":"game.mobile","pathPrefix":"/u5."},{"scheme":"ntesu5","host":"game.mobile"},{"scheme":"ntesu5","host":"com.netease.party.bilibili"}]';
+
+      const body = JSON.stringify({
+        server: '15001',
+        code: 'u5',
+        sign: auth.sign,
+        language: 'zh-CN',
+        deviceName: 'duchamp',
+        systemVersion: 36,
+        uuid: uuid,
+        mode: 'view',
+        systemName: 'android',
+        batteryState: 2,       // 修改为 2
+        extra: '',
+        appId: '4608997350',
+        batteryLevel: 61,      // 修改为 61
+        gameId: 'u5',
+        roleId: roleId,
+        deeplink: deeplinkStr, // 修改为完整规则
+        env: 'production',
+        nonce: auth.nonce,
+        size: 'medium',
+        domain: 'https://u5-vision.nie.netease.com',
+        designId: 4608997351,
+        sdkVersion: 3,
+        deviceModel: deviceModel,
+        ts: auth.ts,
+        nightMode: false
       });
-      var resp = await fetch('https://u5-vision.nie.netease.com/widget/view', {
+
+      const resp = await fetch('https://u5-vision.nie.netease.com/widget/view', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: body
       });
-      var json = await resp.json();
+
+      const json = await resp.json();
       if (json.success !== 'true') {
         return jr({ success: false, error: json.desc || '失败' }, 500);
       }
-      var el = json.data && json.data.view && json.data.view.elements ? json.data.view.elements : {};
-      var weatherIcons = [];
+
+      const el = json.data && json.data.view && json.data.view.elements ? json.data.view.elements : {};
+      const weatherIcons = [];
       if (el['image_R3Xw:R5xp'] && el['image_R3Xw:R5xp'].src) weatherIcons.push(el['image_R3Xw:R5xp'].src);
       if (el['image_JeHp:Vmcb'] && el['image_JeHp:Vmcb'].src) weatherIcons.push(el['image_JeHp:Vmcb'].src);
-      
-      // 根据 URL 映射获取天气名称
-      var weatherNames = weatherIcons.map(url => getWeatherName(url));
-      
+      const weatherNames = weatherIcons.map(url => getWeatherName(url));
+
       return jr({
         success: true,
         data: {
@@ -130,6 +127,7 @@ export default {
   }
 };
 
+// 辅助函数
 function gs(o, k) { return o[k] && o[k].src ? o[k].src : ''; }
 function gt(o, k) { return o[k] && o[k].content ? o[k].content : ''; }
 function jr(d, s) {
@@ -139,17 +137,20 @@ function jr(d, s) {
   });
 }
 
+// 签名生成 (与示例算法一致)
 function ga(roleId, token) {
-  var ts = Date.now();
-  var chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-  var nonce = '';
-  for (var i = 0; i < 18; i++) nonce += chars.charAt(Math.floor(Math.random() * 36));
-  var now = new Date(ts + 28800000);
-  var ds = now.getUTCFullYear() + '' + String(now.getUTCMonth() + 1).padStart(2, '0') + '' + String(now.getUTCDate()).padStart(2, '0');
-  var dt = md5('code=u5&date=' + ds + '&token=' + token);
-  return { sign: md5('code=u5&roleId=' + roleId + '&nonce=' + nonce + '&ts=' + ts + '&token=' + dt), nonce: nonce, ts: ts };
+  const ts = Date.now();
+  const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+  let nonce = '';
+  for (let i = 0; i < 18; i++) nonce += chars.charAt(Math.floor(Math.random() * 36));
+  const now = new Date(ts + 28800000);
+  const ds = now.getUTCFullYear() + '' + String(now.getUTCMonth() + 1).padStart(2, '0') + '' + String(now.getUTCDate()).padStart(2, '0');
+  const dt = md5('code=u5&date=' + ds + '&token=' + token);
+  const sign = md5('code=u5&roleId=' + roleId + '&nonce=' + nonce + '&ts=' + ts + '&token=' + dt);
+  return { sign, nonce, ts };
 }
 
+// MD5 实现 (已完整)
 function md5(s) {
   function L(k, d) { return (k << d) | (k >>> (32 - d)); }
   function K(G, k) { var I, d, F, H, x; F = (G & 2147483648); H = (k & 2147483648); I = (G & 1073741824); d = (k & 1073741824); x = (G & 1073741823) + (k & 1073741823); if (I & d) return (x ^ 2147483648 ^ F ^ H); if (I | d) { if (x & 1073741824) return (x ^ 3221225472 ^ F ^ H); else return (x ^ 1073741824 ^ F ^ H); } else return (x ^ F ^ H); }
