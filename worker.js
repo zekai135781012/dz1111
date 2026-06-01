@@ -1,3 +1,10 @@
+// ======================== 硬编码核心配置（直接写死，不读环境变量）========================
+const ROLE_ID = '667612565';
+const SERVER = '15001';
+const UUID = 'ef04cb4babb31ab4';
+const DEVICE_MODEL = 'Xiaomi#2311DRK48C';
+const TOKEN = 'aU0ZcOzmpNoa56fDez';
+
 // ======================== 天气 URL → 名称映射表 ========================
 const WEATHER_URL_MAP = {
   "https://widget.fp.ps.netease.com/file/693663baa2f97dd3de09e29ftroicpWu07.png": "大风",
@@ -31,7 +38,7 @@ function getWeatherName(url) {
 }
 
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, ctx) {
     var cors = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -45,24 +52,16 @@ export default {
       return jr({ success: false, error: 'Not Found' }, 404);
     }
     try {
-      // ========== 核心配置（与 Bash 脚本完全一致）==========
-      var roleId = env.FARM_ROLE_ID || '667612565';
-      var server = env.FARM_SERVER || '15001';
-      var uuid = env.FARM_UUID || 'ef04cb4babb31ab4';
-      var deviceModel = env.FARM_DEVICE_MODEL || 'Xiaomi#2311DRK48C';
-      var token = env.FARM_TOKEN || 'aU0ZcOzmpNoa56fDez';
-      // ===================================================
-
-      var auth = ga(roleId, token);
+      var auth = ga(ROLE_ID, TOKEN);
 
       var body = JSON.stringify({
-        server: server,
+        server: SERVER,
         code: 'u5',
         sign: auth.sign,
         language: 'zh-CN',
         deviceName: 'duchamp',
         systemVersion: 36,
-        uuid: uuid,
+        uuid: UUID,
         mode: 'view',
         systemName: 'android',
         batteryState: 2,
@@ -70,7 +69,7 @@ export default {
         appId: '4608997350',
         batteryLevel: 61,
         gameId: 'u5',
-        roleId: roleId,
+        roleId: ROLE_ID,
         deeplink: '[{"scheme":"ntes","host":"game.mobile","pathPrefix":"/party"},{"scheme":"ntes","host":"game.mobile","pathPrefix":"/u5."},{"scheme":"ntesu5","host":"game.mobile"},{"scheme":"ntesu5","host":"com.netease.party.bilibili"}]',
         env: 'production',
         nonce: auth.nonce,
@@ -78,7 +77,7 @@ export default {
         domain: 'https://u5-vision.nie.netease.com',
         designId: 4608997351,
         sdkVersion: 3,
-        deviceModel: deviceModel,
+        deviceModel: DEVICE_MODEL,
         ts: auth.ts,
         nightMode: false
       });
@@ -120,9 +119,9 @@ export default {
           toolQualityBg: gs(el, 'image_6grb:EYVa'),
           fetchTime: Date.now()
         },
-        maskedRoleId: roleId.substring(0, 3) + '***',
+        maskedRoleId: ROLE_ID.substring(0, 3) + '***',
         maskedDeviceModel: '***',
-        maskedUuid: uuid.substring(0, 4) + '***'
+        maskedUuid: UUID.substring(0, 4) + '***'
       });
     } catch (e) {
       return jr({ success: false, error: e.message }, 500);
