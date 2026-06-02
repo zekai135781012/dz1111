@@ -3,7 +3,6 @@ const ROLE_ID = '667612565';
 const SERVER = '15001';
 const UUID = 'ef04cb4babb31ab4';
 const DEVICE_MODEL = 'Xiaomi#2311DRK48C';
-const TOKEN = 'aU0ZcOzmpNoa56fDez';
 
 // ======================== 夜间休眠判断 ========================
 function isNightSleep() {
@@ -45,7 +44,7 @@ function getWeatherName(url) {
 }
 
 export default {
-  async fetch(request, ctx) {
+  async fetch(request, env, ctx) {
     var cors = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -67,7 +66,8 @@ export default {
     }
 
     try {
-      var auth = ga(ROLE_ID, TOKEN);
+      var token = env.FARM_TOKEN || 'aU0ZcOzmpNoa56fDez';
+      var auth = ga(ROLE_ID, token);
 
       var body = JSON.stringify({
         server: SERVER,
