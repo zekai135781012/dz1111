@@ -15,7 +15,7 @@ function isNightSleep() {
 const WEATHER_URL_MAP = {
   "https://widget.fp.ps.netease.com/file/693663baa2f97dd3de09e29ftroicpWu07.png": "大风",
   "https://widget.fp.ps.netease.com/file/69f13fd3c80fbeb22ba1c346QUlTmMBB07.png": "故障",
-  "https://widget.fp.ps.netease.com/file/693651729bb3342ac54938392OVHuyFR07.png": "萤火",
+  "https://widget.fp.ps.netease.com/file/693651729bb3342ac54938392OVHuyFR07.png": "萤光",
   "https://widget.fp.ps.netease.com/file/693651714e8f3ba036914fe0d6wCyZS707.png": "霓虹",
   "https://widget.fp.ps.netease.com/file/693663bbd44e87eaddf05cf7FFJcO1Jp07.png": "彩虹",
   "https://widget.fp.ps.netease.com/file/697a97ae4ffff555d8de9a31uIzhrELS07.png": "日蚀",
